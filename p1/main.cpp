@@ -44,37 +44,64 @@ vector<int> int2bin(int i){
     return ret;
 }
 
+int bin2int(vector<int> bin){
+    auto ret = 0;
+    for(auto i = bin.size(); i > 0; i--) {
+        ret += bin[i-1] * pow(2, bin.size() -i);
+    }
+    return ret;
+}
+
 vector<int> cifrar(const string m, const vector<int> k) {
     auto ret = vector<int>();
     for(auto c : m){
-        auto x = int2bin(int(c) - int('@'));
+        auto bin = int2bin(int(c) - int('@'));
         auto cif = 0;
-        for(int i = 0; i < x.size(); i++) {
-            cif += x[i] * k[i];
+        for(int i = 0; i < bin.size(); i++) {
+            cif += bin[i] * k[i];
         }
         ret.push_back(cif);
     }
     return ret;
 }
 
+string descifrar(vector<int> m, const vector<int> k, const int n, const int w_inv) {
+    string ret = "";
+    for(auto i = 0; i < m.size(); i++)
+        m[i] = (m[i] * w_inv) % n;
+    
+    for(auto c : m) {
+        auto bin = vector<int>(5, 0);
+        for(auto i = k.size(); i > 0; i--) {
+            if(c >= k[i-1]) {
+                bin[i-1] = 1;
+                c -= k[i-1];
+            }
+        }
+        ret += char(bin2int(bin) + 64);
+    }
+    return ret;
+}
+
 int main() {
     auto n = 5;
-    const auto vol = vector<int>{2, 3, 7, 15, 31};
+    const auto k_priv = vector<int>{2, 3, 7, 15, 31};
     const auto N = 61;
     const auto w = 17;
 
     auto w_inv = invMod(w,N);
-    auto k_pub = vol;
+    auto k_pub = k_priv;
     for(int i = 0; i < k_pub.size(); i++)
         k_pub[i] = (w * k_pub[i]) % N;
 
     string mensaje = "HOLA";
     cout << "Mensaje a enviar: " + mensaje << endl;
     auto cifrado = cifrar(mensaje, k_pub);
-    cout << "Mensaje cifrado: " << cifrado[0];
-    for(auto i = 1; i < cifrado.size(); i++){
-        cout << ", " << cifrado[i];
+    cout << "Mensaje cifrado:";
+    for(auto c : cifrado){
+        cout << " " << c;
     }
     cout << endl;
-
+    auto descifrado = descifrar(cifrado, k_priv, N, w_inv);
+    cout << "Mensaje descifrado: " + descifrado << endl;
 } 
