@@ -8,37 +8,34 @@
 #include <vector>
 #include <algorithm>
 #include <numeric>
+#include <chrono>
 
 using namespace std;
 
 const int blockSize = 8;
 
 /*
- * https://regor.home.blog/2020/04/25/calculo-del-inverso-modular/
+ * https://www.lawebdelprogramador.com/foros/Dev-C/1549476-Ayuda-Funcion-Inverso-Multiplicativo.html
  * Calcula el inverso modular de a módulo b
  */
-int invMod(int a, int b) {
-    int r0 = a>b? a:b;
-    int r1 = r0==a? b:a;
-    int s0=1, s1=0, t0=0, t1=1;
+ int invMod(int a, int m) {
+    int m0 = m, t, q;
+    int x0 = 0, x1 = 1;
  
-    while (r1 != 0) {
-        int r = r0 % r1;
-        int q = int(r0/r1);
-        int s = s0 - q * s1;
-        int t = t0 - q * t1;
+    if (m == 1)
+        return 0;
+    while (a > 1) {
+        q = a / m;
+        t = m;
+        m = a % m, a = t;
+        t = x0;
+        x0 = x1 - q * x0;
+        x1 = t;
+    }
+    if (x1 < 0)
+        x1 += m0;
  
-        r0 = r1;
-        r1 = r;
-        s0 = s1;
-        s1 = s;
-        t0 = t1;
-        t1 = t;
-    }
-    if (r0 != 1) {
-        cout << "Error" << endl;
-    }
-    return a<b? t0%b:s0%b;
+    return x1;
 }
 
 /*
@@ -59,13 +56,10 @@ vector<int> int2bin(int i){
  * Devuelve la codificación en bits de l entero i
  */
 int bin2int(vector<int> bin){
-    string b = "";
     auto ret = 0;
     for(auto i = bin.size(); i > 0; i--) {
-        b += bin[i-1];
         ret += bin[i-1] * pow(2, bin.size() -i);
     }
-    cout << "bin: " << b << ". int: " << ret << endl;
     return ret;
 }
 
@@ -74,17 +68,12 @@ int bin2int(vector<int> bin){
  */
 vector<int> encrypt(const string m, const vector<int> k) {
     auto ret = vector<int>();
-    cout << m << endl;
     for(auto c : m){
-        cout << "Caracter: " << c << flush;
         auto bin = int2bin(int(c));
         auto cif = 0;
-        cout << ". binario: ";
         for(int i = 0; i < bin.size(); i++) {
             cif += bin[i] * k[i];
-            cout << bin[i];
         }
-        cout << endl;
         ret.push_back(cif);
     }
     return ret;
@@ -115,10 +104,7 @@ bool check_k_priv(vector<int> k_priv, int N, int w){
     int sum = 0;
     for(int i = 0; i < k_priv.size()-1; i++){
         sum += k_priv[i];
-        if(sum >= k_priv[i+1]) { 
-            cout << "1" << endl;
-            return false;
-        }
+        if(sum >= k_priv[i+1]) return false;
     }
     if (N <= sum + k_priv[k_priv.size()-1]) return false;
     if (gcd(N, w) != 1) return false;
@@ -128,35 +114,36 @@ bool check_k_priv(vector<int> k_priv, int N, int w){
 //Ejemplo de ejecución: cifrar_y_descifrar k_priv message
 int main(int argc, char* argv[]) {
     
+    if (argc < 2) {
+      cout << "Uso: cifrar_y_descifrar <fichero_clave> <fichero_mensaje>" << endl;
+      cout << "\fichero_clave: nombre del fichero que contiene la clave privada" << endl;
+      cout << "\tfichero_mensaje: nombre del fichero que contiene el mensaje" << endl;
+    }
+    
     string key(argv[1]);
     string messageFile(argv[2]);
-    string output(argv[3]);
     ifstream kf(key);
     ifstream mf(messageFile);
-    ofstream of(output);
     
+    //Lectura de argumentos
     auto k_priv = vector<int>();
     for(auto i = 0; i < blockSize; i++) {
         int x;
         kf >> x;
         k_priv.push_back(x);
     }
-    cout << "k_priv: ";
-    for(auto c : k_priv){
-        cout << " " << c;
-    }
-    cout << endl;
-
+    
     int N, w;
     kf >> N;
     kf >> w;
-    cout << "N: " << N << ". w: " << w << endl;
     
+    //Comprobar si los valores de la clave privada cumplen las restricciones
     if(!check_k_priv(k_priv, N, w)){
-        cerr << "los componentes de la clave privada no cumplen las restricciones" << endl;
+        cerr << "Los componentes de la clave privada no cumplen las restricciones" << endl;
         return 1;
     }
-
+    
+    //Leer mensaje
     unsigned long long int read_bytes = 45 * 1024 *1024;
     char* memblock;
     string message = "";
@@ -169,18 +156,28 @@ int main(int argc, char* argv[]) {
         delete [] memblock;
     }
     
-    auto w_inv = invMod(w,N);
+    // Calcular la clave pública a partir de la clave privada
     auto k_pub = k_priv;
     for(int i = 0; i < k_pub.size(); i++)
         k_pub[i] = (w * k_pub[i]) % N;
 
-    cout << "Mensaje a enviar: " + message << endl;
+    // Calcular el inverso de w módulo N
+    auto w_inv = invMod(w,N);
+
+    auto t0 = std::chrono::high_resolution_clock::now();
     auto encrypted = encrypt(message, k_pub);
-    cout << "Mensaje cifrado:";
-    for(auto c : encrypted){
-        cout << " " << c;
-    }
-    cout << endl;
+    auto t1 = std::chrono::high_resolution_clock::now();
+    auto t_encrypt = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0);
+    
+    t0 = std::chrono::high_resolution_clock::now();
     auto decrypted = decrypt(encrypted, k_priv, N, w_inv);
-    cout << "Mensaje descifrado: " + decrypted << endl;
+    t1 = std::chrono::high_resolution_clock::now();
+    auto t_desencrypt = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - t0);;
+    
+    if(decrypted == message){
+        cout << "El mensaje desencriptado coincide con el original" << endl;
+        cout << "Tiempo de cifrado: " << t_encrypt.count() * 1e-6 << " ms " << endl;
+        cout << "Tiempo de descifrado: " << t_desencrypt.count() * 1e-6 << " ms " << endl;
+        cout << "Tiempo total: " << (t_encrypt + t_desencrypt).count() * 1e-6 << " ms " << endl;
+    }
 } 

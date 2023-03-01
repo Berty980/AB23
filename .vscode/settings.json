@@ -2,6 +2,7 @@
     "files.associations": {
         "random": "cpp",
         "xstring": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "type_traits": "cpp"
     }
 }
