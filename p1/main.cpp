@@ -1,14 +1,22 @@
 #include <cmath>
 #include <iostream>
+#include <fstream>
 #include <random>
 #include <string>
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <algorithm>
+#include <numeric>
 
 using namespace std;
 
-// https://regor.home.blog/2020/04/25/calculo-del-inverso-modular/
+const int blockSize = 8;
+
+/*
+ * https://regor.home.blog/2020/04/25/calculo-del-inverso-modular/
+ * Calcula el inverso modular de a módulo b
+ */
 int invMod(int a, int b) {
     int r0 = a>b? a:b;
     int r1 = r0==a? b:a;
@@ -33,6 +41,9 @@ int invMod(int a, int b) {
     return a<b? t0%b:s0%b;
 }
 
+/*
+ * Devuelve el entero representado por la codificación binaria bin
+*/
 vector<int> int2bin(int i){
     auto ret = vector<int>(5, 0);
     auto j = 1;
@@ -44,6 +55,9 @@ vector<int> int2bin(int i){
     return ret;
 }
 
+/*
+ * Devuelve la codificación en bits de l entero i
+ */
 int bin2int(vector<int> bin){
     auto ret = 0;
     for(auto i = bin.size(); i > 0; i--) {
@@ -52,20 +66,30 @@ int bin2int(vector<int> bin){
     return ret;
 }
 
-vector<int> cifrar(const string m, const vector<int> k) {
+/*
+ * Cifra el mensaje m con la clave k
+ */
+vector<int> encrypt(const string m, const vector<int> k) {
     auto ret = vector<int>();
     for(auto c : m){
-        auto bin = int2bin(int(c) - int('@'));
+        cout << "Caracter: " << c;
+        auto bin = int2bin(int(c));
         auto cif = 0;
+        cout << ". binario: ";
         for(int i = 0; i < bin.size(); i++) {
             cif += bin[i] * k[i];
+            cout << bin[i];
         }
+        cout << endl;
         ret.push_back(cif);
     }
     return ret;
 }
 
-string descifrar(vector<int> m, const vector<int> k, const int n, const int w_inv) {
+/*
+ *Descifra el mensaje m con la clave privada k y los enteros N y w'  
+ */
+string decrypt(vector<int> m, const vector<int> k, const int n, const int w_inv) {
     string ret = "";
     for(auto i = 0; i < m.size(); i++)
         m[i] = (m[i] * w_inv) % n;
@@ -83,25 +107,76 @@ string descifrar(vector<int> m, const vector<int> k, const int n, const int w_in
     return ret;
 }
 
-int main() {
-    auto n = 5;
-    const auto k_priv = vector<int>{2, 3, 7, 15, 31};
-    const auto N = 61;
-    const auto w = 17;
+bool check_k_priv(vector<int> k_priv, int N, int w){
+    int sum = 0;
+    for(int i = 0; i < k_priv.size()-1; i++){
+        sum += k_priv[i];
+        if(sum >= k_priv[i+1]) { 
+            cout << "1" << endl;
+            return false;
+        }
+    }
+    if (N <= sum + k_priv[k_priv.size()-1]) return false;
+    if (gcd(N, w) != 1) return false;
+    return true; 
+}
 
+//Ejemplo de ejecución: cifrar_y_descifrar k_priv message
+int main(int argc, char* argv[]) {
+    
+    string key(argv[1]);
+    string messageFile(argv[2]);
+    string output(argv[3]);
+    ifstream kf(key);
+    ifstream mf(messageFile);
+    ofstream of(output);
+    
+    auto k_priv = vector<int>();
+    for(auto i = 0; i < blockSize; i++) {
+        int x;
+        kf >> x;
+        k_priv.push_back(x);
+    }
+    cout << "k_priv: ";
+    for(auto c : k_priv){
+        cout << " " << c;
+    }
+    cout << endl;
+
+    int N, w;
+    kf >> N;
+    kf >> w;
+    cout << "N: " << N << ". w: " << w << endl;
+    
+    if(!check_k_priv(k_priv, N, w)){
+        cerr << "los componentes de la clave privada no cumplen las restricciones" << endl;
+        return 1;
+    }
+
+    unsigned long long int read_bytes = 45 * 1024 *1024;
+    char* memblock;
+    string message = "";
+    while(!mf.eof())
+    {
+        memblock = new char[read_bytes];
+        mf.read(memblock, read_bytes);
+        string str(memblock);
+        message += str;
+        delete [] memblock;
+    }
+    
     auto w_inv = invMod(w,N);
     auto k_pub = k_priv;
     for(int i = 0; i < k_pub.size(); i++)
         k_pub[i] = (w * k_pub[i]) % N;
 
-    string mensaje = "HOLA";
-    cout << "Mensaje a enviar: " + mensaje << endl;
-    auto cifrado = cifrar(mensaje, k_pub);
+    cout << "Mensaje a enviar: " + message << endl;
+    auto encrypted = encrypt(message, k_pub);
     cout << "Mensaje cifrado:";
-    for(auto c : cifrado){
+    for(auto c : encrypted){
         cout << " " << c;
     }
     cout << endl;
-    auto descifrado = descifrar(cifrado, k_priv, N, w_inv);
-    cout << "Mensaje descifrado: " + descifrado << endl;
+    auto decrypted = decrypt(encrypted, k_priv, N, w_inv);
+    cout << "Mensaje descifrado: " + decrypted << endl;
 } 
