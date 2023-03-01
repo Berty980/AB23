@@ -24,9 +24,9 @@ int main(int argc, char* argv[]) {
     string message = "";
     mt19937 mt(static_cast<unsigned int>(time(nullptr)));
     uniform_int_distribution<int> dist(32, 126);  //distribucion uniforme de los caracteres escribibles
-    int ascii_code = dist(mt);
-    char ascii_char = static_cast<char>(ascii_code);
     for(int i = 0; i < n; i++){
+        int ascii_code = dist(mt);
+        char ascii_char = static_cast<char>(ascii_code);
         message += ascii_char;
     }
 

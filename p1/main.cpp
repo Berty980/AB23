@@ -45,7 +45,7 @@ int invMod(int a, int b) {
  * Devuelve el entero representado por la codificación binaria bin
 */
 vector<int> int2bin(int i){
-    auto ret = vector<int>(5, 0);
+    auto ret = vector<int>(blockSize, 0);
     auto j = 1;
     while(i > 0) {
         ret[ret.size() - j] = i%2;
@@ -59,10 +59,13 @@ vector<int> int2bin(int i){
  * Devuelve la codificación en bits de l entero i
  */
 int bin2int(vector<int> bin){
+    string b = "";
     auto ret = 0;
     for(auto i = bin.size(); i > 0; i--) {
+        b += bin[i-1];
         ret += bin[i-1] * pow(2, bin.size() -i);
     }
+    cout << "bin: " << b << ". int: " << ret << endl;
     return ret;
 }
 
@@ -71,8 +74,9 @@ int bin2int(vector<int> bin){
  */
 vector<int> encrypt(const string m, const vector<int> k) {
     auto ret = vector<int>();
+    cout << m << endl;
     for(auto c : m){
-        cout << "Caracter: " << c;
+        cout << "Caracter: " << c << flush;
         auto bin = int2bin(int(c));
         auto cif = 0;
         cout << ". binario: ";
@@ -95,14 +99,14 @@ string decrypt(vector<int> m, const vector<int> k, const int n, const int w_inv)
         m[i] = (m[i] * w_inv) % n;
     
     for(auto c : m) {
-        auto bin = vector<int>(5, 0);
+        auto bin = vector<int>(blockSize, 0);
         for(auto i = k.size(); i > 0; i--) {
             if(c >= k[i-1]) {
                 bin[i-1] = 1;
                 c -= k[i-1];
             }
         }
-        ret += char(bin2int(bin) + 64);
+        ret += char(bin2int(bin));
     }
     return ret;
 }
