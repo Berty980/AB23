@@ -41,7 +41,8 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
     return solutions[s.length()];
 }
 
-void getSelections(set<string> dictionary, int selSize, string& sel, string& mod_sel) {
+void getSelections(set<string> dictionary, int selSize, int p,
+                    string& sel) {
     int numWords = dictionary.size(); // Número de palabras en el dicionario
     string selection = "";  // Selección vacía
     random_device rd;
@@ -58,20 +59,21 @@ void getSelections(set<string> dictionary, int selSize, string& sel, string& mod
     // Guardamos la selección en el parámetro de salida
     sel = selection;
 
-    int LF = selection.size(); // Longitud de la selección (string)
-    uniform_int_distribution<> distribModif(1, LF*10);
-    // Recorremos cada carácter de la selección
-    for (int i = 0; i < LF; i++) {
-        // Obtenemos aleatoriamente la probabilidad de modificar el carácter
-        int num = distribModif(gen);
-        // Si la probabilidad es menor que 1 se modifica por otro carácter aleatorio
-        if (num <= 1) {
-            char newWord = 'a' + (rand() % 26);
-            selection[i] = newWord;
-        }
+    if(p){
+        int LF = selection.size(); // Longitud de la selección (string)
+        uniform_int_distribution<> distribModif(1, LF*p);
+        // Recorremos cada carácter de la selección
+        for (int i = 0; i < LF; i++) {
+            // Obtenemos aleatoriamente la probabilidad de modificar el carácter
+            int num = distribModif(gen);
+            // Si la probabilidad es menor que 1 se modifica por otro carácter aleatorio
+            if (num <= 1) {
+                char newWord = 'a' + (rand() % 26);
+                selection[i] = newWord;
+            }
+        }    
     }
-    // Guardamos la selección modificada en otro parámetro de salida
-    mod_sel = selection;
+    
 }
 
 void getArgs(const int argc, const char *argv[],
@@ -112,6 +114,11 @@ int main(int argc, char* argv[]) {
             << "\tdiccionario: nombre del fichero de salida (las posibles particiones solo se escriben en él)" << endl;*/
 
     auto maxReps = 100;
+    
+    string dic_name, resultados_name;
+    //l es la longitud de la cadena y p es p en la formula 1/LF*p
+    int l = -1, p = -1;
+    getArgs(argc, argv, dic_name, resultados_name, l, p);
 
     ifstream dic(argv[1]);
     ofstream resultados(argv[2]);
@@ -134,14 +141,14 @@ int main(int argc, char* argv[]) {
     auto t_sel = chrono::nanoseconds(0);
     auto t_search = chrono::nanoseconds(0);
     std::vector<std::vector<std::string>> partitions;
-    std::vector<std::vector<std::string>> partitions_mod;
 
-    string sel, mod_sel;
+    string sel;
     for (int i = 0; i < maxReps; i++) {
-        sel = "", mod_sel = "";
+        sel = "";
+        if(l == -1) l = dictionary.size() / 10;
         // Cálculo del tiempo de ejecución de la función getSelections
         auto t0 = chrono::high_resolution_clock::now();
-        getSelections(dictionary, dictionary.size() / 10, sel, mod_sel);
+        getSelections(dictionary, l, p, sel);
         auto t1 = chrono::high_resolution_clock::now();
         t_sel += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
@@ -149,7 +156,6 @@ int main(int argc, char* argv[]) {
         // Cálculo del tiempo de ejecución de la función separarPalabras
         auto t0 = chrono::high_resolution_clock::now();
         partitions = separarPalabras(sel, dictionary);
-        partitions_mod = separarPalabras(mod_sel, dictionary);
         auto t1 = chrono::high_resolution_clock::now();
         t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
