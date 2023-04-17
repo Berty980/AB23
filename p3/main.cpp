@@ -6,19 +6,32 @@
 
 using namespace std;
 
-vector<vector<string>> wordBreak(string s, set<string>& wordDict) {
-    int n = s.length();
-    vector<vector<vector<string>>> dp(n + 1);  // dp[i] = todas las particiones posibles de s[0:i-1] en palabras del diccionario
-    dp[0] = {{}};  // la cadena vacía se puede dividir en una única partición vacía
+vector<vector<string>> separarPalabras(string s, set<string>& dic) {
+    //matriz de programación dinámica que guarda las soluciones
+    //de los subproblemas de tamaño 0 a n. Es por lo tanto un
+    //vector unidimensional de soluciones (las soluciones son
+    //particiones, es decir, vectores de vectores de palabras)
+    vector<vector<vector<string>>> solutions(n + 1);
 
-    for (int i = 1; i <= n; i++) {
+    //rellenamos la matriz con el caso base para calcular el
+    //subproblema más pequeño en base a este
+    solutions[0] = {{}};
+
+    //rellenamos la matriz
+    for (int i = 1; i <= s.length(); i++) {
         for (int j = 0; j < i; j++) {
-            if (!dp[j].empty() && wordDict.count(s.substr(j, i - j))) {
-                string word = s.substr(j, i - j);
-                for (auto& partition : dp[j]) {
-                    partition.push_back(word);
-                    dp[i].push_back(partition);
-                    partition.pop_back();
+            //Si no hay soluciones para el subproblema tamaño j no
+            //podemos construir una solución al subproblema tamaño i
+            if (!solutions[j].empty()){
+                string suffix = s.substr(j, i - j);
+                //si el sufijo constituye una palabra añadimos la
+                //partición a la solución de tamaño i
+                if (dic.find(suffix) != dic.end()) {
+                    for (vector<string> partition : solutions[j]) {
+                        vector<string> partition_aux = partition;
+                        partition_aux.push_back(suffix);
+                        solutions[i].push_back(partition_aux);
+                    }
                 }
             }
         }
@@ -33,7 +46,7 @@ vector<vector<string>> wordBreak(string s, set<string>& wordDict) {
             cout << endl;
         }
     }*/
-    return dp[n];
+    return solutions[n];
 }
 
 void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
@@ -82,13 +95,13 @@ int main(int argc, char* argv[]) {
     string sel = "", mod_sel = "";
     getSelections(dictionary, sel, mod_sel);
 
-    vector<vector<string>> partitions = wordBreak(mod_sel, dictionary);
+    vector<vector<string>> partitions = separarPalabras(mod_sel, dictionary);
 
     if (partitions.empty()) {
         cout << "La cadena no se puede dividir en palabras del diccionario" << endl;
     } else {
         cout << "Todas las particiones posibles de la cadena en palabras del diccionario son:" << endl;
-        for (auto& partition : partitions) {
+        for (vector<string> partition : partitions) {
             for (int i = 0; i < partition.size(); i++) {
                 cout << partition[i];
                 if (i < partition.size() - 1) {
