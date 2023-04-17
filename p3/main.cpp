@@ -1,10 +1,12 @@
 #include <iostream>
-#include <unordered_set>
+#include <fstream>
+#include <set>
 #include <vector>
+#include <random>
 
 using namespace std;
 
-vector<vector<string>> wordBreak(string s, unordered_set<string>& wordDict) {
+vector<vector<string>> wordBreak(string s, set<string>& wordDict) {
     int n = s.length();
     vector<vector<vector<string>>> dp(n + 1);  // dp[i] = todas las particiones posibles de s[0:i-1] en palabras del diccionario
     dp[0] = {{}};  // la cadena vacía se puede dividir en una única partición vacía
@@ -21,7 +23,7 @@ vector<vector<string>> wordBreak(string s, unordered_set<string>& wordDict) {
             }
         }
     }
-    for (int i = 0; i <= n; i++) {
+    /*for (int i = 0; i <= n; i++) {
         cout << "i = " << i << endl;
         for (int j = 0; j < dp[i].size(); j++) {
             cout << "\t";
@@ -30,15 +32,57 @@ vector<vector<string>> wordBreak(string s, unordered_set<string>& wordDict) {
             }
             cout << endl;
         }
-    }
+    }*/
     return dp[n];
 }
 
-int main() {
-    string s = "catsanddog";
-    unordered_set<string> wordDict = {"cat", "cats", "and", "sand", "dog", "catsand"};
+void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
+    int numWords = dictionary.size();
+    int selSize = numWords / 10;
+    string selection = "";
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> distrib(0, numWords-1);
+    while (selection.size() < selSize) {
+        int idx = distrib(gen);
+        auto it = dictionary.begin();
+        advance(it, idx);
+        selection += *it;
+    }
+    sel = selection;
 
-    vector<vector<string>> partitions = wordBreak(s, wordDict);
+    int LF = selection.size();
+    uniform_int_distribution<> distribModif(1, LF*10);
+    for (int i = 0; i < LF; i++) {
+        int num = distribModif(gen);
+        if (num <= 1) {
+            char newWord = 'a' + (rand() % 26);
+            selection[i] = newWord;
+        }
+    }
+    mod_sel = selection;
+}
+
+int main(int argc, char* argv[]) {
+    ifstream dic(argv[1]);
+
+    if (!dic) { // Verificar si el archivo se abrió correctamente
+        cerr << "Error al abrir el archivo." << endl;
+        return 1;
+    }
+
+    set<string> dictionary; // Declarar el conjunto para almacenar las palabras
+
+    string word;
+    while (dic >> word) { // Leer cada palabra del archivo
+        dictionary.insert(word); // Insertar la palabra en el conjunto
+    }
+
+    dic.close(); // Cerrar el archivo
+    string sel = "", mod_sel = "";
+    getSelections(dictionary, sel, mod_sel);
+
+    vector<vector<string>> partitions = wordBreak(mod_sel, dictionary);
 
     if (partitions.empty()) {
         cout << "La cadena no se puede dividir en palabras del diccionario" << endl;
