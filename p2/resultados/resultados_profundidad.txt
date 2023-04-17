@@ -1,0 +1,35 @@
+Prueba 1
+	Profundidad: 4
+	Bolas: 8
+	Tiempo de generación del árbol: 0.002 us 
+	Tiempo de cálculo de posiciones: 0.00065 us 
+	Posición de las bolas: 1: 8, 2: 12, 3: 10, 4: 14, 5: 9, 6: 13, 7: 11, 8: 15
+
+Prueba 2
+	Profundidad: 6
+	Bolas: 8
+	Tiempo de generación del árbol: 0.00571 us 
+	Tiempo de cálculo de posiciones: 0.00058 us 
+	Posición de las bolas: 1: 32, 2: 48, 3: 40, 4: 56, 5: 36, 6: 52, 7: 44, 8: 60
+
+Prueba 3
+	Profundidad: 9
+	Bolas: 8
+	Tiempo de generación del árbol: 0.04305 us 
+	Tiempo de cálculo de posiciones: 0.00082 us 
+	Posición de las bolas: 1: 256, 2: 384, 3: 320, 4: 448, 5: 288, 6: 416, 7: 352, 8: 480
+
+Prueba 4
+	Profundidad: 14
+	Bolas: 8
+	Tiempo de generación del árbol: 1.33063 us 
+	Tiempo de cálculo de posiciones: 0.00181 us 
+	Posición de las bolas: 1: 8192, 2: 12288, 3: 10240, 4: 14336, 5: 9216, 6: 13312, 7: 11264, 8: 15360
+
+Prueba 5
+	Profundidad: 21
+	Bolas: 8
+	Tiempo de generación del árbol: 169.149 us 
+	Tiempo de cálculo de posiciones: 0.00494 us 
+	Posición de las bolas: 1: 1048576, 2: 1572864, 3: 1310720, 4: 1835008, 5: 1179648, 6: 1703936, 7: 1441792, 8: 1966080
+

@@ -16,7 +16,7 @@ struct Node {
 
 Node* getTree(int id, int depth) {
     if (id > pow(2, depth) - 1) return nullptr;
-    auto node = new Node(id);
+    Node* node = new Node(id);
     node->left = getTree(2 * id, depth);
     node->right = getTree(2 * id + 1, depth);
     return node;
@@ -24,7 +24,7 @@ Node* getTree(int id, int depth) {
 
 int getBallPosition(Node* node, int ball) {
     if (node->left == nullptr) return node->id;
-    auto left = !node->ag;
+    bool left = !node->ag;
     node->ag = !node->ag;
     if (left) return getBallPosition(node->left, ball);
     else return getBallPosition(node->right, ball);
@@ -40,7 +40,7 @@ vector<int> getBallPositions(int balls, Node* root) {
 
 int main(int argc, char* argv[]) {
 
-    auto maxReps = 100;
+    auto maxReps = 10;
 
     if (argc < 2)
       cout << "Uso: pinball <pruebas> <resultados>" << endl
@@ -62,6 +62,10 @@ int main(int argc, char* argv[]) {
     while (getline(p, data)) { // Leemos cada línea del archivo
         int P, n;
         sscanf(data.c_str(), "%d %d", &P, &n);
+        if(n > pow(2, (P-1))){
+            cerr << "el número de bolas no puede ser superior al número de nodos hoja" << endl;
+            return -1;
+        }
         
         auto t_tree = chrono::nanoseconds(0);
         auto t_pos = chrono::nanoseconds(0);
