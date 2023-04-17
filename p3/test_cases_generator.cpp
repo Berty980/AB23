@@ -16,9 +16,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    //Parsear el tamaño del diccionario
+    // Primer parámetro: tamaño del diccionario
     int n = atoi(argv[1]);
-    //parsear el nombre del fichero de salida
+    // Segundo parámetro: nombre del fichero de salida
     ofstream f_out(argv[2]);
     set<string> dictionary;
     //Generar diccionario

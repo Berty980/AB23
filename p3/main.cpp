@@ -51,30 +51,36 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
     return solutions[s.length()];
 }
 
-void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
-    int numWords = dictionary.size();
-    int selSize = numWords / 10;
-    string selection = "";
+void getSelections(set<string> dictionary, int selSize, string& sel, string& mod_sel) {
+    int numWords = dictionary.size(); // Número de palabras en el dicionario
+    string selection = "";  // Selección vacía
     random_device rd;
     mt19937 gen(rd());
     uniform_int_distribution<> distrib(0, numWords-1);
+    // Iterar hasta tener el número de palabras deseado en la selección
     while (selection.size() < selSize) {
-        int idx = distrib(gen);
+        int idx = distrib(gen); // Obtenemos aleatorimente el índice de una palabra del diccionario
         auto it = dictionary.begin();
         advance(it, idx);
+        // Añadimos la palabra a la selección
         selection += *it;
     }
+    // Guardamos la selección en el parámetro de salida
     sel = selection;
 
-    int LF = selection.size();
+    int LF = selection.size(); // Longitud de la selección (string)
     uniform_int_distribution<> distribModif(1, LF*10);
+    // Recorremos cada carácter de la selección
     for (int i = 0; i < LF; i++) {
+        // Obtenemos aleatoriamente la probabilidad de modificar el carácter
         int num = distribModif(gen);
-        if (num <= 1) {
+        // Si la probabilidad es menor que 1 se modifica por otro carácter aleatorio
+        if (num <= 1) { 
             char newWord = 'a' + (rand() % 26);
             selection[i] = newWord;
         }
     }
+    // Guardamos la selección modificada en otro parámetro de salida
     mod_sel = selection;
 }
 
@@ -104,18 +110,20 @@ int main(int argc, char* argv[]) {
     auto t_sel = chrono::nanoseconds(0);
     auto t_search = chrono::nanoseconds(0);
     std::vector<std::vector<std::string>> partitions;
+    std::vector<std::vector<std::string>> partitions_mod;
     
     string sel, mod_sel;
     for (int i = 0; i < maxReps; i++) {
         sel = "", mod_sel = "";
         auto t0 = chrono::high_resolution_clock::now();
-        getSelections(dictionary, sel, mod_sel);
+        getSelections(dictionary, dictionary.size() / 10, sel, mod_sel);
         auto t1 = chrono::high_resolution_clock::now();
         t_sel += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
     for (int i = 0; i < maxReps; i++) {
         auto t0 = chrono::high_resolution_clock::now();
         partitions = separarPalabras(sel, dictionary);
+        partitions_mod = separarPalabras(mod_sel, dictionary);
         auto t1 = chrono::high_resolution_clock::now();
         t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
@@ -123,20 +131,26 @@ int main(int argc, char* argv[]) {
     cout << "Diccionario con " << dictionary.size() << " palabras" << endl;
     cout << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
     cout << "\tTiempo de búsqueda de las selecciones en el diccionario: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
-    cout << "\tCadena: " << sel << endl;
-        
+    cout << "\tCadena original: " << sel << endl;
+    cout << "\t\t" << partitions.size() << " particiones posibles" << endl;
+    cout << "\tCadena modificada: " << mod_sel << endl;
+    cout << "\t\t" << partitions_mod.size() << " particiones posibles" << endl;
 
     if (partitions.empty()) {
         cout << "\tLa cadena no es divisible" << endl;
     } else {
         cout << "\t" << partitions.size() << " particiones posibles:" << endl;
+        auto i = 0;
         for (auto& partition : partitions) {
             cout << "\t\t";
-            for (auto i = 0; i < partition.size(); i++) {
-                cout << partition[i];
-                if (i < partition.size() - 1) {
-                    cout << " ";
+            if(i < 3) {
+                for (auto i = 0; i < partition.size(); i++) {
+                    cout << partition[i];
+                    if (i < partition.size() - 1) {
+                        cout << " ";
+                    }
                 }
+                i++;
             }
             cout << endl;
         }
