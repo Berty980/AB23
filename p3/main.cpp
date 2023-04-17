@@ -11,7 +11,7 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
     //de los subproblemas de tamaño 0 a n. Es por lo tanto un
     //vector unidimensional de soluciones (las soluciones son
     //particiones, es decir, vectores de vectores de palabras)
-    vector<vector<vector<string>>> solutions(n + 1);
+    vector<vector<vector<string>>> solutions(s.length() + 1);
 
     //rellenamos la matriz con el caso base para calcular el
     //subproblema más pequeño en base a este
@@ -46,7 +46,7 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
             cout << endl;
         }
     }*/
-    return solutions[n];
+    return solutions[s.length()];
 }
 
 void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
@@ -94,7 +94,7 @@ int main(int argc, char* argv[]) {
     dic.close(); // Cerrar el archivo
     string sel = "", mod_sel = "";
     getSelections(dictionary, sel, mod_sel);
-
+    sel = "catsanddogs";
     vector<vector<string>> partitions = separarPalabras(mod_sel, dictionary);
 
     if (partitions.empty()) {
