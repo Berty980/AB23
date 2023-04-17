@@ -36,7 +36,7 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
             }
         }
     }
-    cout << "s.length() " << s.length() << endl;
+    /*cout << "s.length() " << s.length() << endl;
     for (int i = 0; i <= s.length(); i++) {
         cout << "i = " << i << endl;
         for (int j = 0; j < solutions[i].size(); j++) {
@@ -46,7 +46,7 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
             }
             cout << endl;
         }
-    }
+    }*/
     return solutions[s.length()];
 }
 
