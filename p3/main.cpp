@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <random>
+#include <chrono>
 
 using namespace std;
 
@@ -78,31 +79,60 @@ void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
 }
 
 int main(int argc, char* argv[]) {
+    if (argc < 1)
+        cout << "Uso: main <diccionario>" << endl
+            << "\tdiccionario: nombre del fichero que contiene el diccionario" << endl;
+            
+
+    auto maxReps = 100;
+
     ifstream dic(argv[1]);
 
-    if (!dic) { // Verificar si el archivo se abrió correctamente
+    if (!dic) { // Verificar si se ha abierto el archivo correctamente
         cerr << "Error al abrir el archivo." << endl;
         return 1;
     }
 
-    set<string> dictionary; // Declarar el conjunto para almacenar las palabras
-
+    set<string> dictionary; // Diccionario de palabras
     string word;
-    while (dic >> word) { // Leer cada palabra del archivo
-        dictionary.insert(word); // Insertar la palabra en el conjunto
-    }
+    int a = 0;
+    while (dic >> word)
+        dictionary.insert(word);
 
     dic.close(); // Cerrar el archivo
-    string sel = "", mod_sel = "";
-    getSelections(dictionary, sel, mod_sel);
-    vector<vector<string>> partitions = separarPalabras(mod_sel, dictionary);
+    
+    auto t_sel = chrono::nanoseconds(0);
+    auto t_search = chrono::nanoseconds(0);
+    std::vector<std::vector<std::string>> partitions;
+    
+    string sel, mod_sel;
+    for (int i = 0; i < maxReps; i++) {
+        sel = "", mod_sel = "";
+        auto t0 = chrono::high_resolution_clock::now();
+        getSelections(dictionary, sel, mod_sel);
+        auto t1 = chrono::high_resolution_clock::now();
+        t_sel += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
+    }
+    for (int i = 0; i < maxReps; i++) {
+        auto t0 = chrono::high_resolution_clock::now();
+        partitions = separarPalabras(sel, dictionary);
+        auto t1 = chrono::high_resolution_clock::now();
+        t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
+    }
+
+    cout << "Diccionario con " << dictionary.size() << " palabras" << endl;
+    cout << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
+    cout << "\tTiempo de búsqueda de las selecciones en el diccionario: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
+    cout << "\tCadena: " << sel << endl;
+        
 
     if (partitions.empty()) {
-        cout << "La cadena no se puede dividir en palabras del diccionario" << endl;
+        cout << "\tLa cadena no es divisible" << endl;
     } else {
-        cout << "Todas las particiones posibles de la cadena en palabras del diccionario son:" << endl;
-        for (vector<string> partition : partitions) {
-            for (int i = 0; i < partition.size(); i++) {
+        cout << "\t" << partitions.size() << " particiones posibles:" << endl;
+        for (auto& partition : partitions) {
+            cout << "\t\t";
+            for (auto i = 0; i < partition.size(); i++) {
                 cout << partition[i];
                 if (i < partition.size() - 1) {
                     cout << " ";

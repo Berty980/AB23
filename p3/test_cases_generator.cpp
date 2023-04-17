@@ -4,6 +4,7 @@
 #include <random>
 #include <algorithm>
 #include <numeric>
+#include <set>
 
 using namespace std;
 
@@ -19,19 +20,22 @@ int main(int argc, char* argv[]) {
     int n = atoi(argv[1]);
     //parsear el nombre del fichero de salida
     ofstream f_out(argv[2]);
-
+    set<string> dictionary;
     //Generar diccionario
     mt19937 mt(static_cast<unsigned int>(time(nullptr)));
-    uniform_int_distribution<int> dist(97, 122);  //distribucion uniforme de los caracteres escribibles
-    for(int i = 0; i < n; i++){
-        uniform_int_distribution<int> wordLength(2, 10);  //distribucion uniforme de los caracteres escribibles
+    uniform_int_distribution<int> dist(97, 122);
+    while(dictionary.size() < n){
+        uniform_int_distribution<int> wordLength(2, 10);
         string word = "";
         for(int j = 0; j < wordLength(mt); j++){
-            int ascii_code = dist(mt);
-            char ascii_char = static_cast<char>(ascii_code);
-            word += ascii_char;
+            int ascii = dist(mt);
+            char _char = static_cast<char>(ascii);
+            word += _char;
         }
-        f_out << word << " ";
+        if(dictionary.find(word) == dictionary.end()) {
+            f_out << word << " ";
+            dictionary.insert(word);
+        }
     }
 
     //Escribir mensaje
