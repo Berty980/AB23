@@ -4,6 +4,7 @@
 #include <vector>
 #include <random>
 #include <chrono>
+#include <unistd.h>
 
 using namespace std;
 
@@ -37,17 +38,6 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
             }
         }
     }
-    /*cout << "s.length() " << s.length() << endl;
-    for (int i = 0; i <= s.length(); i++) {
-        cout << "i = " << i << endl;
-        for (int j = 0; j < solutions[i].size(); j++) {
-            cout << "\t";
-            for (int k = 0; k < solutions[i][j].size(); k++) {
-                cout << solutions[i][j][k] << " ";
-            }
-            cout << endl;
-        }
-    }*/
     return solutions[s.length()];
 }
 
@@ -84,12 +74,42 @@ void getSelections(set<string> dictionary, int selSize, string& sel, string& mod
     mod_sel = selection;
 }
 
+void getArgs(const int argc, const char *argv[],
+            std::string& input_file ,std::string& output_file,
+            int& l, int& p
+            )
+{
+    int opt;
+
+    while ((opt = getopt(argc, argv, "i:o:l::p::")) != -1) {
+        switch (opt) {
+            case 'i':
+                input_file = optarg;
+                break;
+            case 'o':
+                output_file = optarg;
+                break;
+            case 'l':
+                l = optarg ? std::stoi(optarg) : -1;
+                break;
+            case 'p':
+                p = optarg ? std::stoi(optarg) : -1;
+                break;
+            default:
+                std::cerr << "Uso: " << argv[0] << " -i archivo_entrada -o archivo_salida [-l longitud de la cadena] [-p p en la formula de la probabilidad de cambiar una letra de la cadena 1/(LF ∗ p)]" << std::endl;
+                exit(2);
+        }
+    }
+
+
+    return args;
+}
+
 int main(int argc, char* argv[]) {
-    if (argc < 1)
+    /*if (argc < 1)
         cout << "Uso: main <diccionario> <resultados>" << endl
             << "\tdiccionario: nombre del fichero que contiene el diccionario" << endl
-            << "\tdiccionario: nombre del fichero de salida (las posibles particiones solo se escriben en él)" << endl;
-
+            << "\tdiccionario: nombre del fichero de salida (las posibles particiones solo se escriben en él)" << endl;*/
 
     auto maxReps = 100;
 
@@ -104,10 +124,12 @@ int main(int argc, char* argv[]) {
     set<string> dictionary; // Diccionario de palabras
     string word;
     int a = 0;
+    // Leer las palabras del diccionario de fichero
     while (dic >> word)
         dictionary.insert(word);
 
-    dic.close(); // Cerrar el archivo
+    // Cerrar el archivo
+    dic.close();
 
     auto t_sel = chrono::nanoseconds(0);
     auto t_search = chrono::nanoseconds(0);
@@ -117,12 +139,14 @@ int main(int argc, char* argv[]) {
     string sel, mod_sel;
     for (int i = 0; i < maxReps; i++) {
         sel = "", mod_sel = "";
+        // Cálculo del tiempo de ejecución de la función getSelections
         auto t0 = chrono::high_resolution_clock::now();
         getSelections(dictionary, dictionary.size() / 10, sel, mod_sel);
         auto t1 = chrono::high_resolution_clock::now();
         t_sel += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
     for (int i = 0; i < maxReps; i++) {
+        // Cálculo del tiempo de ejecución de la función separarPalabras
         auto t0 = chrono::high_resolution_clock::now();
         partitions = separarPalabras(sel, dictionary);
         partitions_mod = separarPalabras(mod_sel, dictionary);
@@ -130,7 +154,7 @@ int main(int argc, char* argv[]) {
         t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
 
-
+    // Se escriben los resultados y las métricas tanto en fichero como en salida estandar
     resultados << "Diccionario con " << dictionary.size() << " palabras" << endl;
     resultados << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
     resultados << "\tTiempo de separación de palabras: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
@@ -146,6 +170,7 @@ int main(int argc, char* argv[]) {
         resultados << "\t" << partitions.size() << " particiones posibles:" << endl;
         cout << "\t" << partitions.size() << " particiones posibles:" << endl;
         auto i = 0;
+        // Se escriben las particiones encontradas únicamente en fichero
         for (auto& partition : partitions) {
             resultados << "\t\t";
             for (auto i = 0; i < partition.size(); i++) {
@@ -155,9 +180,9 @@ int main(int argc, char* argv[]) {
                 }
                 i++;
             }
-            resultados << endl;
+            resultados << endl << endl;
         }
     }
-
+    resultados.close();
     return 0;
 }
