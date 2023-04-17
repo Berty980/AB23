@@ -1,0 +1,7 @@
+Diccionario con 625 palabras
+	Tiempo de generación de las selecciones: 0.122763 us 
+	Tiempo de separación de palabras: 0.239246 us 
+	Cadena: qprmqphuowjgbsjpayojsbsznwhwlyaapxnpyxiirsukevmxublqbmcszvftjbfxx
+
+	1 particiones posibles:
+		qprmqp huow jgbs jpa yoj sbsz nwhwl yaap xnp yxi irsukev mxubl qbm cszvft jbfxx
