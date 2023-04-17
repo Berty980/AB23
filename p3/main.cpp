@@ -36,16 +36,17 @@ vector<vector<string>> separarPalabras(string s, set<string>& dic) {
             }
         }
     }
-    /*for (int i = 0; i <= n; i++) {
+    cout << "s.length() " << s.length() << endl;
+    for (int i = 0; i <= s.length(); i++) {
         cout << "i = " << i << endl;
-        for (int j = 0; j < dp[i].size(); j++) {
+        for (int j = 0; j < solutions[i].size(); j++) {
             cout << "\t";
-            for (int k = 0; k < dp[i][j].size(); k++) {
-                cout << dp[i][j][k] << " ";
+            for (int k = 0; k < solutions[i][j].size(); k++) {
+                cout << solutions[i][j][k] << " ";
             }
             cout << endl;
         }
-    }*/
+    }
     return solutions[s.length()];
 }
 
@@ -94,7 +95,6 @@ int main(int argc, char* argv[]) {
     dic.close(); // Cerrar el archivo
     string sel = "", mod_sel = "";
     getSelections(dictionary, sel, mod_sel);
-    sel = "catsanddogs";
     vector<vector<string>> partitions = separarPalabras(mod_sel, dictionary);
 
     if (partitions.empty()) {
