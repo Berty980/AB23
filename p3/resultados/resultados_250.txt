@@ -1,0 +1,7 @@
+Diccionario con 250 palabras
+	Tiempo de generación de las selecciones: 0.047135 us 
+	Tiempo de separación de palabras: 0.041546 us 
+	Cadena: ykdooaajnsrragtsferqcytbq
+
+	1 particiones posibles:
+		yk dooaa jnsr rag tsfer qcytbq

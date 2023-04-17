@@ -1,0 +1,7 @@
+Diccionario con 1562 palabras
+	Tiempo de generación de las selecciones: 0.419423 us 
+	Tiempo de separación de palabras: 1.58512 us 
+	Cadena: mpsrpoplaopydlgjnnooljdizdbtqnooljdqaljvpxotraguvvkwjycsplhxvtwuitqssccxpadeqwypulftelanegnsopreiwiabzfviyuopydibehcdxolmjagjqoacyympottdalgvwxwrtnfvgkgsdrb
+
+	1 particiones posibles:
+		mps rp opla opyd lgjn nooljd izdbtq nooljd qalj vpxotr aguvvk wjycs plhxvtw uitqs sccxp ad eqw ypul ftel anegn sopre iw iabzfviyu opyd ibe hcdxol mjag jqoa cyymp ottdal gvwxw rtn fvgkgsdrb

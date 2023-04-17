@@ -80,13 +80,15 @@ void getSelections(set<string> dictionary, string& sel, string& mod_sel) {
 
 int main(int argc, char* argv[]) {
     if (argc < 1)
-        cout << "Uso: main <diccionario>" << endl
-            << "\tdiccionario: nombre del fichero que contiene el diccionario" << endl;
+        cout << "Uso: main <diccionario> <resultados>" << endl
+            << "\tdiccionario: nombre del fichero que contiene el diccionario" << endl
+            << "\tdiccionario: nombre del fichero de salida (las posibles particiones solo se escriben en él)" << endl;
             
 
     auto maxReps = 100;
 
     ifstream dic(argv[1]);
+    ofstream resultados(argv[2]);
 
     if (!dic) { // Verificar si se ha abierto el archivo correctamente
         cerr << "Error al abrir el archivo." << endl;
@@ -120,25 +122,30 @@ int main(int argc, char* argv[]) {
         t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
 
+    
+    resultados << "Diccionario con " << dictionary.size() << " palabras" << endl;
+    resultados << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
+    resultados << "\tTiempo de separación de palabras: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
+    resultados << "\tCadena: " << sel << endl << endl;
     cout << "Diccionario con " << dictionary.size() << " palabras" << endl;
     cout << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
-    cout << "\tTiempo de búsqueda de las selecciones en el diccionario: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
-    cout << "\tCadena: " << sel << endl;
+    cout << "\tTiempo de separación de palabras: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
         
 
     if (partitions.empty()) {
-        cout << "\tLa cadena no es divisible" << endl;
+        resultados << "\tLa cadena no es divisible" << endl;
     } else {
+        resultados << "\t" << partitions.size() << " particiones posibles:" << endl;
         cout << "\t" << partitions.size() << " particiones posibles:" << endl;
         for (auto& partition : partitions) {
-            cout << "\t\t";
+            resultados << "\t\t";
             for (auto i = 0; i < partition.size(); i++) {
-                cout << partition[i];
+                resultados << partition[i];
                 if (i < partition.size() - 1) {
-                    cout << " ";
+                    resultados << " ";
                 }
             }
-            cout << endl;
+            resultados << endl;
         }
     }
 

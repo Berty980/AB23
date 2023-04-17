@@ -1,0 +1,7 @@
+Diccionario con 100 palabras
+	Tiempo de generación de las selecciones: 0.025525 us 
+	Tiempo de separación de palabras: 0.010438 us 
+	Cadena: ootasucvoooyb
+
+	1 particiones posibles:
+		ootasucv oooyb
