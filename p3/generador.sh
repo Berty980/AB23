@@ -1,5 +1,5 @@
 #!/bin/bash
-g++ dictionary_generator.cpp -o gen
+g++ dictionary_generator.cpp -o gen -std=c++11
 ./gen 100 pruebas/diccionario_100.txt
 ./gen 250 pruebas/diccionario_250.txt
 ./gen 625 pruebas/diccionario_625.txt
