@@ -59,7 +59,7 @@ void getSelections(set<string> dictionary, int selSize, int p,
     // Guardamos la selección en el parámetro de salida
     sel = selection;
 
-    if(p){
+    if(p != -1){
         int LF = selection.size(); // Longitud de la selección (string)
         uniform_int_distribution<> distribModif(1, LF*p);
         // Recorremos cada carácter de la selección
@@ -71,12 +71,12 @@ void getSelections(set<string> dictionary, int selSize, int p,
                 char newWord = 'a' + (rand() % 26);
                 selection[i] = newWord;
             }
-        }    
+        }
     }
-    
+
 }
 
-void getArgs(const int argc, const char *argv[],
+void getArgs(int argc, char *argv[],
             std::string& input_file ,std::string& output_file,
             int& l, int& p
             )
@@ -102,9 +102,6 @@ void getArgs(const int argc, const char *argv[],
                 exit(2);
         }
     }
-
-
-    return args;
 }
 
 int main(int argc, char* argv[]) {
@@ -113,15 +110,14 @@ int main(int argc, char* argv[]) {
             << "\tdiccionario: nombre del fichero que contiene el diccionario" << endl
             << "\tdiccionario: nombre del fichero de salida (las posibles particiones solo se escriben en él)" << endl;*/
 
-    auto maxReps = 100;
-    
+    auto maxReps = 5;
+
     string dic_name, resultados_name;
     //l es la longitud de la cadena y p es p en la formula 1/LF*p
     int l = -1, p = -1;
     getArgs(argc, argv, dic_name, resultados_name, l, p);
-
-    ifstream dic(argv[1]);
-    ofstream resultados(argv[2]);
+    ifstream dic(dic_name);
+    ofstream resultados(resultados_name);
 
     if (!dic) { // Verificar si se ha abierto el archivo correctamente
         cerr << "Error al abrir el archivo." << endl;
@@ -159,13 +155,19 @@ int main(int argc, char* argv[]) {
         auto t1 = chrono::high_resolution_clock::now();
         t_search += chrono::duration_cast<chrono::nanoseconds>(t1 - t0);
     }
+    auto prob = 0.0;
+    if(p != -1) prob = 1.0/(sel.size() * p);
 
     // Se escriben los resultados y las métricas tanto en fichero como en salida estandar
     resultados << "Diccionario con " << dictionary.size() << " palabras" << endl;
+    resultados << "Longitud de la selección: " << l << " palabras" << endl;
+    resultados << "Probabilidad de alteración de carácter:  " << prob << endl;
     resultados << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
     resultados << "\tTiempo de separación de palabras: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
     resultados << "\tCadena: " << sel << endl << endl;
     cout << "Diccionario con " << dictionary.size() << " palabras" << endl;
+    cout << "Longitud de la selección: " << l << " palabras" << endl;
+    cout << "Probabilidad de alteración de carácter:  " << prob << endl;
     cout << "\tTiempo de generación de las selecciones: " << t_sel.count()/maxReps * 1e-6 << " us " << endl;
     cout << "\tTiempo de separación de palabras: " << t_search.count()/maxReps * 1e-6 << " us " << endl;
 
@@ -174,7 +176,7 @@ int main(int argc, char* argv[]) {
         resultados << "\tLa cadena no es divisible" << endl;
     } else {
         resultados << "\t" << partitions.size() << " particiones posibles:" << endl;
-        cout << "\t" << partitions.size() << " particiones posibles:" << endl;
+        cout << "\t" << partitions.size() << " particiones posibles" << endl;
         auto i = 0;
         // Se escriben las particiones encontradas únicamente en fichero
         for (auto& partition : partitions) {
